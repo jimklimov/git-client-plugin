@@ -1482,9 +1482,13 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
                         listener.error("Invalid repository for " + sModuleName);
                         throw new GitException("Invalid repository for " + sModuleName);
                     }
+                    String strURIish = null;
+                    if (urIish != null) {
+                        strURIish = urIish.toPrivateString();
+                    }
 
                     if (isParameterizedReferenceRepository(ref)) {
-                        File referencePath = findParameterizedReferenceRepository(ref, urIish);
+                        File referencePath = findParameterizedReferenceRepository(ref, strURIish);
                         if (referencePath == null) {
                             listener.getLogger().println("[ERROR] Could not make File object from reference path, skipping its use: " + ref);
                         } else {
@@ -1505,7 +1509,7 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
                     }
 
                     // Find credentials for this URL
-                    StandardCredentials cred = credentials.get(urIish.toPrivateString());
+                    StandardCredentials cred = credentials.get(strURIish);
                     if (parentCredentials) {
                         String parentUrl = getRemoteUrl(getDefaultRemote());
                         URIish parentUri = null;
