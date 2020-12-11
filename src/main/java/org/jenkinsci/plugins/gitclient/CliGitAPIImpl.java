@@ -1612,11 +1612,7 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
         return StringUtils.trim(firstLine(result));
     }
 
-    /** {@inheritDoc}
-     *
-     * Note: unlike the version in JGitAPIImpl, this one does not filter
-     * ASCII or Private URLs, and just conveys what git config contains.
-     */
+    /** {@inheritDoc} */
     @Override
     public @CheckForNull Map<String, String> getRemoteUrls() throws GitException, InterruptedException {
         String result = launchCommand( "config", "--local", "--list" );
@@ -1632,6 +1628,14 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
 
             // If uri String values end up identical, Map only stores one entry
             uriNames.put(remoteUri, remoteName);
+
+            try {
+                URI u = new URI(remoteUri);
+                uriNames.put(u.toASCIIString(), remoteName);
+                URI uSafe = new URI(u.getScheme(), u.getHost(), u.getPath(), u.getFragment());
+                uriNames.put(uSafe.toString(), remoteName);
+                uriNames.put(uSafe.toASCIIString(), remoteName);
+            } catch (URISyntaxException ue) {} // ignore, move along
         }
         return uriNames;
     }
@@ -1650,6 +1654,14 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
             String remoteName = StringUtils.substringBetween(line, "remote.", ".pushurl=");
             String remoteUri = StringUtils.substringAfter(line, ".pushurl=");
             uriNames.put(remoteUri, remoteName);
+
+            try {
+                URI u = new URI(remoteUri);
+                uriNames.put(u.toASCIIString(), remoteName);
+                URI uSafe = new URI(u.getScheme(), u.getHost(), u.getPath(), u.getFragment());
+                uriNames.put(uSafe.toString(), remoteName);
+                uriNames.put(uSafe.toASCIIString(), remoteName);
+            } catch (URISyntaxException ue) {} // ignore, move along
         }
         return uriNames;
     }
