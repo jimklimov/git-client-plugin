@@ -2285,12 +2285,12 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
 
     private File createUnixSshAskpass(SSHUserPrivateKey sshUser, @NonNull File passphrase) throws IOException {
         File ssh = createTempFile("pass", ".sh");
+        fixSELinuxLabel(ssh, "ssh_exec_t");
         try (PrintWriter w = new PrintWriter(ssh, encoding)) {
             w.println("#!/bin/sh");
             w.println("cat " + unixArgEncodeFileName(passphrase.getAbsolutePath()));
         }
         ssh.setExecutable(true, true);
-        fixSELinuxLabel(ssh, "ssh_exec_t");
         return ssh;
     }
 
@@ -2307,6 +2307,7 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
 
     private File createUnixStandardAskpass(StandardUsernamePasswordCredentials creds, File usernameFile, File passwordFile) throws IOException {
         File askpass = createTempFile("pass", ".sh");
+        fixSELinuxLabel(askpass, "ssh_exec_t");
         try (PrintWriter w = new PrintWriter(askpass, encoding)) {
             w.println("#!/bin/sh");
             w.println("case \"$1\" in");
@@ -2315,7 +2316,6 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
             w.println("esac");
         }
         askpass.setExecutable(true, true);
-        fixSELinuxLabel(askpass, "ssh_exec_t");
         return askpass;
     }
 
@@ -2500,17 +2500,18 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
             w.println("ssh -i \"" + key.getAbsolutePath() + "\" -l \"" + user + "\" -o StrictHostKeyChecking=no \"$@\"");
         }
         ssh.setExecutable(true, true);
-        fixSELinuxLabel(ssh, "ssh_exec_t");
         //JENKINS-48258 git client plugin occasionally fails with "text file busy" error
         //The following creates a copy of the generated file and deletes the original
         //In case of a failure return the original and delete the copy
         String fromLocation = ssh.toString();
         String toLocation = ssh_copy.toString();
         //Copying ssh file
+        fixSELinuxLabel(ssh, "ssh_exec_t");
         try {
             new ProcessBuilder("cp", fromLocation, toLocation).start().waitFor();
             isCopied = true;
             ssh_copy.setExecutable(true,true);
+            fixSELinuxLabel(ssh_copy, "ssh_exec_t");
             //Deleting original file
             deleteTempFile(ssh);
         }
