@@ -2192,9 +2192,9 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
                 args.add("--type=ssh_home_t");
                 args.add(key.getPath());
                 Launcher.ProcStarter p = launcher.launch().cmds(args.toCommandArray());
-                int status;
-                String stdout;
-                String stderr;
+                int status = -1;
+                String stdout = "";
+                String stderr = "";
                 String command = gitExe + " " + StringUtils.join(args.toCommandArray(), " ");
 
                 try {
@@ -2211,6 +2211,12 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
                     stderr = stderrStream.toString(encoding);
                 } catch (Throwable e) {
                     listener.getLogger().println("Error performing chcon helper command: " + command + " :\n" + e.toString());
+                }
+                if (status > 0) {
+                    listener.getLogger().println("[WARNING] Failed (" + status + ") performing chcon helper command: " + command + ":\n" +
+                        (stdout.equals("") ? "" : ( "=== STDOUT:\n" + stdout + "\n====\n" )) +
+                        (stderr.equals("") ? "" : ( "=== STDERR:\n" + stderr + "\n====\n" )) +
+                        "IMPACT: if SELinux is enabled, access to temporary key file may be denied for git+ssh below");
                 }
             }
         } else {
