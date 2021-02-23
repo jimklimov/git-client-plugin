@@ -2572,6 +2572,9 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
                 /* GIT_SSH won't call the passphrase prompt script unless detached from controlling terminal */
                 args.prepend("setsid");
             }
+            if (env.containsKey("SSH_AUTH_SOCK")) {
+                listener.getLogger().println("Executing git with SSH_AUTH_SOCK=" + env.get("SSH_AUTH_SOCK", ""));
+            }
             int usedTimeout = timeout == null ? TIMEOUT : timeout;
             listener.getLogger().println(" > " + command + TIMEOUT_LOG_PREFIX + usedTimeout);
 
