@@ -2292,12 +2292,12 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
 
     private File createUnixSshAskpass(SSHUserPrivateKey sshUser, @NonNull File passphrase) throws IOException {
         File ssh = createTempFile("pass", ".sh");
-        // fixSELinuxLabel(ssh, "ssh_exec_t");
         try (PrintWriter w = new PrintWriter(ssh, encoding)) {
             w.println("#!/bin/sh");
             w.println("cat " + unixArgEncodeFileName(passphrase.getAbsolutePath()));
         }
         ssh.setExecutable(true, true);
+        // fixSELinuxLabel(ssh, "ssh_exec_t");
         return ssh;
     }
 
@@ -2314,7 +2314,6 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
 
     private File createUnixStandardAskpass(StandardUsernamePasswordCredentials creds, File usernameFile, File passwordFile) throws IOException {
         File askpass = createTempFile("pass", ".sh");
-        // fixSELinuxLabel(askpass, "ssh_exec_t");
         try (PrintWriter w = new PrintWriter(askpass, encoding)) {
             w.println("#!/bin/sh");
             w.println("case \"$1\" in");
@@ -2323,6 +2322,7 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
             w.println("esac");
         }
         askpass.setExecutable(true, true);
+        // fixSELinuxLabel(askpass, "ssh_exec_t");
         return askpass;
     }
 
