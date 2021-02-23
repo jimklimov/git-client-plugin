@@ -2292,12 +2292,16 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
 
     private File createUnixSshAskpass(SSHUserPrivateKey sshUser, @NonNull File passphrase) throws IOException {
         File ssh = createTempFile("pass", ".sh");
-        fixSELinuxLabel(ssh, "ssh_exec_t");
         try (PrintWriter w = new PrintWriter(ssh, encoding)) {
             w.println("#!/bin/sh");
             w.println("cat " + unixArgEncodeFileName(passphrase.getAbsolutePath()));
         }
         ssh.setExecutable(true, true);
+        if (!fixSELinuxLabel(ssh, "ssh_exec_t")) {
+            // As of CentOS7, this seems to be the only executable file
+            // context that can be set by non-sysadmin context processes
+            fixSELinuxLabel(ssh, "httpd_user_script_exec_t");
+        }
         return ssh;
     }
 
@@ -2314,7 +2318,6 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
 
     private File createUnixStandardAskpass(StandardUsernamePasswordCredentials creds, File usernameFile, File passwordFile) throws IOException {
         File askpass = createTempFile("pass", ".sh");
-        fixSELinuxLabel(askpass, "ssh_exec_t");
         try (PrintWriter w = new PrintWriter(askpass, encoding)) {
             w.println("#!/bin/sh");
             w.println("case \"$1\" in");
@@ -2323,6 +2326,11 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
             w.println("esac");
         }
         askpass.setExecutable(true, true);
+        if (!fixSELinuxLabel(askpass, "ssh_exec_t")) {
+            // As of CentOS7, this seems to be the only executable file
+            // context that can be set by non-sysadmin context processes
+            fixSELinuxLabel(askpass, "httpd_user_script_exec_t");
+        }
         return askpass;
     }
 
@@ -2513,12 +2521,18 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
         String fromLocation = ssh.toString();
         String toLocation = ssh_copy.toString();
         //Copying ssh file
-        fixSELinuxLabel(ssh, "ssh_exec_t");
+        if (!fixSELinuxLabel(ssh, "ssh_exec_t")) {
+            // As of CentOS7, this seems to be the only executable file
+            // context that can be set by non-sysadmin context processes
+            fixSELinuxLabel(ssh, "httpd_user_script_exec_t");
+        }
         try {
             new ProcessBuilder("cp", fromLocation, toLocation).start().waitFor();
             isCopied = true;
             ssh_copy.setExecutable(true,true);
-            fixSELinuxLabel(ssh_copy, "ssh_exec_t");
+            if (!fixSELinuxLabel(ssh_copy, "ssh_exec_t")) {
+                fixSELinuxLabel(ssh_copy, "httpd_user_script_exec_t");
+            }
             //Deleting original file
             deleteTempFile(ssh);
         }
