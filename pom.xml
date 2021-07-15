@@ -60,7 +60,7 @@
   </scm>
 
   <properties>
-    <revision>3.7.3</revision>
+    <revision>3.8.1</revision>
     <changelist>-SNAPSHOT</changelist>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
@@ -77,27 +77,9 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.263.x</artifactId>
-        <version>872.v03c18fa35487</version>
+        <version>887.vae9c8ac09ff7</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency><!-- If caffeine is needed, use version 2.9.1.
-                       Resolves an upper bounds dependency message.
-                       Does not include caffeine in the hpi file. -->
-        <groupId>com.github.ben-manes.caffeine</groupId>
-        <artifactId>caffeine</artifactId>
-        <version>2.9.1</version>
-        <exclusions>
-          <!--  do not bring in the annotations -->
-          <exclusion>
-            <groupId>org.checkerframework</groupId>
-            <artifactId>checker-qual</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>error_prone_annotations</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -247,7 +229,7 @@
     <dependency>
       <groupId>nl.jqno.equalsverifier</groupId>
       <artifactId>equalsverifier</artifactId>
-      <version>3.6.1</version>
+      <version>3.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -287,7 +269,7 @@
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
-      <version>4.2.3</version>
+      <version>4.3.0</version>
       <exclusions>
         <exclusion>
           <groupId>com.google.code.findbugs</groupId>
@@ -359,7 +341,7 @@
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs</artifactId>
-            <version>4.2.3</version>
+            <version>4.3.0</version>
           </dependency>
         </dependencies>
       </plugin>
