@@ -2747,6 +2747,7 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
             Launcher.ProcStarter p = launcher.launch().cmds(args.toCommandArray()).envs(freshEnv);
 
             if (workDir != null) {
+                listener.getLogger().println("Executing git in workdir " + workDir);
                 p.pwd(workDir);
             }
 
