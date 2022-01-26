@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.32</version>
+    <version>4.33</version>
     <relativePath />
   </parent>
 
@@ -77,7 +77,7 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.289.x</artifactId>
-        <version>1083.vb6e5d3561904</version>
+        <version>1117.v62a_f6a_01de98</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -276,7 +276,7 @@
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
-      <version>4.5.2</version>
+      <version>4.5.3</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -320,7 +320,7 @@
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
-          <version>2.18.0</version>
+          <version>2.20.0</version>
           <configuration>
             <!-- define a language-specific format -->
             <java>
@@ -376,7 +376,7 @@
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs</artifactId>
-            <version>4.5.2</version>
+            <version>4.5.3</version>
           </dependency>
         </dependencies>
       </plugin>
