@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jenkinsci.plugins.gitclient.verifier.HostKeyVerifierFactory;
 
 /**
  * Partial implementation of {@link IGitAPI} by delegating to {@link GitClient} APIs.
@@ -51,6 +52,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements IGitAPI {
 
     private static final Logger LOGGER = Logger.getLogger(LegacyCompatibleGitAPIImpl.class.getName());
+    private HostKeyVerifierFactory hostKeyFactory;
 
     /**
      * isBareRepository.
@@ -71,8 +73,22 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
      *
      * @param workspace a {@link java.io.File} object.
      */
+    @Deprecated
     protected LegacyCompatibleGitAPIImpl(File workspace) {
         this.workspace = workspace;
+    }
+
+    protected LegacyCompatibleGitAPIImpl(File workspace, HostKeyVerifierFactory hostKeyFactory) {
+        this.workspace = workspace;
+        this.hostKeyFactory = hostKeyFactory;
+    }
+
+    public HostKeyVerifierFactory getHostKeyFactory() {
+        return hostKeyFactory;
+    }
+
+    public void setHostKeyFactory(HostKeyVerifierFactory verifier) {
+        this.hostKeyFactory = verifier;
     }
 
     /** {@inheritDoc} */
