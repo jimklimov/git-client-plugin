@@ -3,6 +3,9 @@ package org.jenkinsci.plugins.gitclient;
 import static java.util.Arrays.copyOfRange;
 import org.apache.commons.codec.digest.DigestUtils;
 import static org.apache.commons.lang.StringUtils.join;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.plugins.git.GitException;
@@ -37,7 +40,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.gitclient.verifier.HostKeyVerifierFactory;
 
 /**
@@ -1166,7 +1168,6 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
 
     /** {@inheritDoc} */
     @Deprecated
-    @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE", justification = "Java 11 spotbugs error")
     public List<Tag> getTagsOnCommit(String revName) throws GitException, IOException {
         try (Repository db = getRepository()) {
             final ObjectId commit = db.resolve(revName);

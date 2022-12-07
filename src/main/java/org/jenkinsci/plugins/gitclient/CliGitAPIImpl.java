@@ -2632,8 +2632,6 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
      *
      * @return File The ssh executable file {@link java.io.File}
      **/
-    @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION",
-                        justification = "Intentionally throws runtime exception")
     public File getSSHExecutable() {
         // First check the GIT_SSH environment variable
         File sshexe = getFileFromEnv("GIT_SSH", "");
@@ -3240,9 +3238,10 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
                 }
 
                 File sparseCheckoutFile = new File(workspace, SPARSE_CHECKOUT_FILE_PATH);
+
                 try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(Files.newOutputStream(sparseCheckoutFile.toPath()), StandardCharsets.UTF_8))) {
                     for (String path : paths) {
-                        writer.println(path);
+                        writer.println(environment.expand(path));
                     }
                 } catch (IOException e) {
                     throw new GitException("Could not write sparse checkout file " + sparseCheckoutFile.getAbsolutePath(), e);
