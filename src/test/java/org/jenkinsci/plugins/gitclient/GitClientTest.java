@@ -18,7 +18,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -576,7 +575,7 @@ public class GitClientTest {
         String badDirName = "CON:";
         File badDir = new File(badDirName);
         GitClient badGitClient = Git.with(TaskListener.NULL, new EnvVars()).in(badDir).using(gitImplName).getClient();
-        Class expectedExceptionClass = gitImplName.equals("git") ? GitException.class : InvalidPathException.class;
+        Class expectedExceptionClass = gitImplName.equals("git") ? GitException.class : JGitInternalException.class;
         assertThrows(expectedExceptionClass,
                      () -> badGitClient.init_().bare(random.nextBoolean()).workspace(badDirName).execute());
     }
