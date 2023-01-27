@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.53</version>
+    <version>4.54</version>
     <relativePath />
   </parent>
 
@@ -58,7 +58,7 @@
   </scm>
 
   <properties>
-    <revision>4.1.0</revision>
+    <revision>4.1.1</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
@@ -73,7 +73,7 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-2.361.x</artifactId>
-        <version>1775.vf0577a_a_01778</version>
+        <version>1792.v0295db_e7c548</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -269,7 +269,7 @@
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
-          <version>2.29.0</version>
+          <version>2.30.0</version>
           <configuration>
             <!-- define a language-specific format -->
             <java>
