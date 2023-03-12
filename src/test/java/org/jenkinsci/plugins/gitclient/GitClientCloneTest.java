@@ -7,7 +7,6 @@ import hudson.plugins.git.GitException;
 import hudson.remoting.VirtualChannel;
 import hudson.util.StreamTaskListener;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
@@ -22,6 +21,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -412,7 +412,7 @@ public class GitClientCloneTest {
         assertAlternatesFileExists();
         final String alternates = ".git" + File.separator + "objects" + File.separator + "info" + File.separator + "alternates";
         final String expectedContent = SRC_DIR.replace("\\", "/") + "/.git/objects";
-        final String actualContent = FileUtils.readFileToString(new File(testGitDir, alternates), "UTF-8");
+        final String actualContent = Files.readString(testGitDir.toPath().resolve(alternates), StandardCharsets.UTF_8);
         assertThat("Alternates file content", actualContent, is(expectedContent));
         final File alternatesDir = new File(actualContent);
         assertThat(alternatesDir, is(anExistingDirectory()));
@@ -576,7 +576,7 @@ public class GitClientCloneTest {
         assertThat("Did not find '" + alternates + "' under '" + _testGitDir + "'",
             new File(_testGitDir, alternates), is(anExistingFile()));
         final String expectedContent = _testAltDir.replace("\\", "/") + "/objects";
-        final String actualContent = FileUtils.readFileToString(new File(_testGitDir, alternates), "UTF-8");
+        final String actualContent = Files.readString(testGitDir.toPath().resolve(alternates), StandardCharsets.UTF_8);
         assertThat("Alternates file content", actualContent, is(expectedContent));
         final File alternatesDir = new File(actualContent);
         assertThat(alternatesDir, is(anExistingDirectory()));
