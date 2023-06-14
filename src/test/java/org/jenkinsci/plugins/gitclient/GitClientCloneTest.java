@@ -288,12 +288,14 @@ public class GitClientCloneTest {
         // below is not confused - it expects this location to not exist.
         // Skip: Missing if clone failed - currently would, with bogus
         // path above and not yet pre-created path structure.
-        //// assertThat("Reference repo logged in: " + messages,
-        ////         handler.containsMessageSubstring(
-        ////                 "Using reference repository: "), is(true));
-        //// assertAlternateFilePointsToLocalMirror();
-        //// assertBranchesExist(testGitClient.getBranches(), "master");
-        //// assertNoObjectsInRepository();
+        /*
+        assertThat("Reference repo logged in: " + messages,
+                handler.containsMessageSubstring(
+                        "Using reference repository: "), is(true));
+        assertAlternateFilePointsToLocalMirror();
+        assertBranchesExist(testGitClient.getBranches(), "master");
+        assertNoObjectsInRepository();
+        */
     }
 
     @Test

@@ -4,7 +4,6 @@ import static java.util.Arrays.copyOfRange;
 import static org.apache.commons.lang.StringUtils.join;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import hudson.model.TaskListener;
 import hudson.plugins.git.GitException;
 import hudson.plugins.git.IGitAPI;
@@ -12,7 +11,6 @@ import hudson.plugins.git.IndexEntry;
 import hudson.plugins.git.Revision;
 import hudson.plugins.git.Tag;
 import hudson.remoting.Channel;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -939,9 +936,9 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
             for (String[] subEntry : result) {
                 // Iterating to filter suggestions in order of original
                 // directory-walk prioritization under current reference
-                String dirName =    subEntry[0];
-                String uri =        subEntry[1];
-                String uriNorm =    subEntry[2];
+                String dirName = subEntry[0];
+                String uri = subEntry[1];
+                String uriNorm = subEntry[2];
                 String remoteName = subEntry[3];
                 Integer sep;
                 String uriNormBasename;
