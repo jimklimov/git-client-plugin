@@ -1,5 +1,10 @@
 package hudson.plugins.git;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import hudson.EnvVars;
 import hudson.model.Node;
 import hudson.model.TaskListener;
@@ -11,10 +16,6 @@ import java.util.List;
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.plugins.gitclient.JGitApacheTool;
 import org.jenkinsci.plugins.gitclient.JGitTool;
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -22,7 +23,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 public class GitToolTest {
 
-    @ClassRule public static JenkinsRule j = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule r = new JenkinsRule();
 
     private GitTool gitTool;
 
@@ -39,7 +41,7 @@ public class GitToolTest {
 
     @Test
     public void testForNode() throws Exception {
-        DumbSlave agent = j.createSlave();
+        DumbSlave agent = r.createSlave();
         agent.setMode(Node.Mode.EXCLUSIVE);
         TaskListener log = StreamTaskListener.fromStdout();
         GitTool newTool = gitTool.forNode(agent, log);
@@ -74,5 +76,4 @@ public class GitToolTest {
         List<ToolDescriptor<? extends GitTool>> toolDescriptors = gitDescriptor.getApplicableDescriptors();
         assertThat(toolDescriptors, containsInAnyOrder(gitDescriptor, jgitDescriptor, jgitApacheDescriptor));
     }
-
 }

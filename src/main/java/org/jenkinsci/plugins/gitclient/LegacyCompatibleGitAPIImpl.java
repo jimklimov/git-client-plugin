@@ -1,12 +1,10 @@
 package org.jenkinsci.plugins.gitclient;
 
 import static java.util.Arrays.copyOfRange;
-import org.apache.commons.codec.digest.DigestUtils;
 import static org.apache.commons.lang.StringUtils.join;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.plugins.git.GitException;
 import hudson.plugins.git.IGitAPI;
@@ -15,31 +13,28 @@ import hudson.plugins.git.Revision;
 import hudson.plugins.git.Tag;
 import hudson.remoting.Channel;
 
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.RefSpec;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
 import org.jenkinsci.plugins.gitclient.verifier.HostKeyVerifierFactory;
 
 /**
@@ -63,6 +58,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
      * @throws hudson.plugins.git.GitException if underlying git operation fails.
      * @throws java.lang.InterruptedException if interrupted.
      */
+    @Override
     public boolean isBareRepository() throws GitException, InterruptedException {
         return isBareRepository("");
     }
@@ -94,6 +90,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public boolean hasGitModules(String treeIsh) throws GitException {
         try {
@@ -105,10 +102,10 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
         } catch (Exception e) {
             throw new GitException("Couldn't check for .gitmodules", e);
         }
-
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void setupSubmoduleUrls(String remote, TaskListener listener) throws GitException, InterruptedException {
         // This is to make sure that we don't miss any new submodules or
@@ -117,16 +114,18 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
         submoduleSync();
         // This allows us to seamlessly use bare and non-bare superproject
         // repositories.
-        fixSubmoduleUrls( remote, listener );
+        fixSubmoduleUrls(remote, listener);
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void fetch(String repository, String refspec) throws GitException, InterruptedException {
         fetch(repository, new RefSpec(refspec));
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void fetch(RemoteConfig remoteRepository) throws InterruptedException {
         // Assume there is only 1 URL for simplicity
@@ -139,6 +138,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
      * @throws hudson.plugins.git.GitException if underlying git operation fails.
      * @throws java.lang.InterruptedException if interrupted.
      */
+    @Override
     @Deprecated
     public void fetch() throws GitException, InterruptedException {
         fetch(null, (RefSpec) null);
@@ -150,19 +150,21 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
      * @throws hudson.plugins.git.GitException if underlying git operation fails.
      * @throws java.lang.InterruptedException if interrupted.
      */
+    @Override
     @Deprecated
     public void reset() throws GitException, InterruptedException {
         reset(false);
     }
 
-
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void push(URIish url, String refspec) throws GitException, InterruptedException {
         push().ref(refspec).to(url).execute();
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void push(String remoteName, String refspec) throws GitException, InterruptedException {
         String url = getRemoteUrl(remoteName);
@@ -178,12 +180,14 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void clone(RemoteConfig source) throws GitException, InterruptedException {
         clone(source, false);
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public void clone(RemoteConfig rc, boolean useShallowClone) throws GitException, InterruptedException {
         // Assume only 1 URL for this repository
@@ -575,7 +579,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                 arrDirnames.add(referenceBaseDirAbs + "/" + needleNormBasename + ".git");
             }
 
-            needleSha = org.apache.commons.codec.digest.DigestUtils.sha256Hex(needleNorm);
+            needleSha = DigestUtils.sha256Hex(needleNorm);
             arrDirnames.add(referenceBaseDirAbs + "/" + needleSha);
             arrDirnames.add(referenceBaseDirAbs + "/" + needleSha + ".git");
 
@@ -992,14 +996,14 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
             if (reference.endsWith("/${GIT_URL_SHA256}")) {
                 // This may be the more portable solution with regard to filesystems
                 referenceExpanded = reference.replaceAll("\\$\\{GIT_URL_SHA256\\}$",
-                    org.apache.commons.codec.digest.DigestUtils.sha256Hex(urlNormalized));
+                    DigestUtils.sha256Hex(urlNormalized));
             } else if (reference.endsWith("/${GIT_URL_SHA256_FALLBACK}")) {
                 // The safest option - fall back to parent directory if
                 // the expanded one does not have git repo data right now:
                 // it allows to gradually convert a big combined reference
                 // repository into smaller chunks without breaking builds.
                 referenceExpanded = reference.replaceAll("\\$\\{GIT_URL_SHA256_FALLBACK\\}$",
-                    org.apache.commons.codec.digest.DigestUtils.sha256Hex(urlNormalized));
+                    DigestUtils.sha256Hex(urlNormalized));
                 if (getObjectsFile(referenceExpanded) == null && getObjectsFile(referenceExpanded + ".git") == null) {
                     // chop it off, use main directory
                     referenceExpanded = referenceBaseDir;
@@ -1155,18 +1159,21 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public List<ObjectId> revListBranch(String branchId) throws GitException, InterruptedException {
         return revList(branchId);
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public List<String> showRevision(Revision r) throws GitException, InterruptedException {
         return showRevision(null, r.getSha1());
     }
 
     /** {@inheritDoc} */
+    @Override
     @Deprecated
     public List<Tag> getTagsOnCommit(String revName) throws GitException, IOException {
         try (Repository db = getRepository()) {
@@ -1177,8 +1184,9 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                 Ref value = tag.getValue();
                 if (value != null) {
                     final ObjectId tagId = value.getObjectId();
-                    if (commit != null && commit.equals(tagId))
+                    if (commit != null && commit.equals(tagId)) {
                         ret.add(new Tag(tag.getKey(), tagId));
+                    }
                 }
             }
             return ret;
@@ -1186,16 +1194,18 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
     }
 
     /** {@inheritDoc} */
+    @Override
     public final List<IndexEntry> lsTree(String treeIsh) throws GitException, InterruptedException {
-        return lsTree(treeIsh,false);
+        return lsTree(treeIsh, false);
     }
 
     /** {@inheritDoc} */
     @Override
     protected Object writeReplace() throws java.io.ObjectStreamException {
         Channel currentChannel = Channel.current();
-        if (currentChannel == null)
+        if (currentChannel == null) {
             throw new java.io.WriteAbortedException("No current channel", new java.lang.NullPointerException());
+        }
         return remoteProxyFor(currentChannel.export(IGitAPI.class, this));
     }
 
@@ -1205,6 +1215,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
      * @return true if this repositor has one or more submodules
      * @throws hudson.plugins.git.GitException if underlying git operation fails.
      */
+    @Override
     public boolean hasGitModules() throws GitException {
         try {
 
@@ -1214,18 +1225,19 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
 
         } catch (SecurityException ex) {
             throw new GitException(
-                                   "Security error when trying to check for .gitmodules. Are you sure you have correct permissions?",
-                                   ex);
+                    "Security error when trying to check for .gitmodules. Are you sure you have correct permissions?",
+                    ex);
         } catch (Exception e) {
             throw new GitException("Couldn't check for .gitmodules", e);
         }
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<String> showRevision(ObjectId r) throws GitException, InterruptedException {
         return showRevision(null, r);
     }
-    
+
     /**
      * This method takes a branch specification and normalizes it get unambiguous results.
      * This is the case when using "refs/heads/"<br>
@@ -1279,9 +1291,8 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
              * well, but would break compatibility with some existing
              * jobs.
              */
-            branch = branchExploded[branchExploded.length-1];
+            branch = branchExploded[branchExploded.length - 1];
         }
         return branch;
     }
-    
 }

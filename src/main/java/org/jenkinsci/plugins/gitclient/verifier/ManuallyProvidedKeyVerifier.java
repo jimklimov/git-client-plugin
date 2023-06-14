@@ -3,11 +3,11 @@ package org.jenkinsci.plugins.gitclient.verifier;
 import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.KnownHosts;
 import hudson.model.TaskListener;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,13 +26,20 @@ public class ManuallyProvidedKeyVerifier extends HostKeyVerifierFactory {
         return tempKnownHosts -> {
             Files.write(tempKnownHosts, (approvedHostKeys + System.lineSeparator()).getBytes(StandardCharsets.UTF_8));
             listener.getLogger().println("Verifying host key using manually-configured host key entries");
+            LOGGER.log(
+                    Level.FINEST,
+                    "Verifying manually-configured host keys entry in {0} with host keys {1}",
+                    new Object[] {tempKnownHosts.toAbsolutePath(), approvedHostKeys});
             String userKnownHostsFileFlag;
-            if (File.pathSeparatorChar == ';') { // check whether on Windows or not without sending Functions over remoting
+            if (File.pathSeparatorChar
+                    == ';') { // check whether on Windows or not without sending Functions over remoting
                 // no escaping for windows because created temp file can't contain spaces
                 userKnownHostsFileFlag = String.format(" -o UserKnownHostsFile=%s", tempKnownHosts.toAbsolutePath());
             } else {
                 // escaping needed in case job name contains spaces
-                userKnownHostsFileFlag = String.format(" -o UserKnownHostsFile=\\\"\"\"%s\\\"\"\"", tempKnownHosts.toAbsolutePath().toString().replace(" ", "\\ "));
+                userKnownHostsFileFlag = String.format(
+                        " -o UserKnownHostsFile=\\\"\"\"%s\\\"\"\"",
+                        tempKnownHosts.toAbsolutePath().toString().replace(" ", "\\ "));
             }
             return "-o StrictHostKeyChecking=yes " + userKnownHostsFileFlag;
         };
@@ -65,10 +72,15 @@ public class ManuallyProvidedKeyVerifier extends HostKeyVerifierFactory {
         }
 
         @Override
-        public boolean verifyServerHostKey(String hostname, int port, String serverHostKeyAlgorithm, byte[] serverHostKey) throws Exception {
-            listener.getLogger().printf("Verifying host key for %s using manually-configured host key entries %n", hostname);
-            return verifyServerHostKey(listener, getKnownHosts(), hostname, port, serverHostKeyAlgorithm, serverHostKey);
+        public boolean verifyServerHostKey(
+                String hostname, int port, String serverHostKeyAlgorithm, byte[] serverHostKey) throws Exception {
+            listener.getLogger()
+                    .printf("Verifying host key for %s using manually-configured host key entries %n", hostname);
+            LOGGER.log(Level.FINEST, "Verifying host {0}:{1} with manually-configured host key {2} {3}", new Object[] {
+                hostname, port, serverHostKeyAlgorithm, Base64.getEncoder().encodeToString(serverHostKey)
+            });
+            return verifyServerHostKey(
+                    listener, getKnownHosts(), hostname, port, serverHostKeyAlgorithm, serverHostKey);
         }
     }
-
 }

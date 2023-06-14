@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.gitclient.trilead;
 
+import static org.junit.Assert.*;
+
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
@@ -11,13 +13,13 @@ import org.eclipse.jgit.transport.URIish;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class SmartCredentialsProviderTest {
 
     private TaskListener listener;
     private SmartCredentialsProvider provider;
     private final URIish gitURI;
+    private final URIish gitURISlash;
+    private final URIish gitURIShort;
     private CredentialItem.Username username;
     private CredentialItem.Password password;
     private CredentialItem.StringType maskedStringType;
@@ -32,7 +34,10 @@ public class SmartCredentialsProviderTest {
     private final String SPECIAL_STRING_TYPE_PROMPT = "Password: ";
 
     public SmartCredentialsProviderTest() throws URISyntaxException {
-        gitURI = new URIish("git://example.com/someone/somewhere.git");
+        String baseUri = "git://example.com/someone/somewhere";
+        gitURI = new URIish(baseUri + ".git");
+        gitURISlash = new URIish(baseUri + ".git/");
+        gitURIShort = new URIish(baseUri);
     }
 
     @Before
@@ -89,7 +94,8 @@ public class SmartCredentialsProviderTest {
         String expectedUsername = "expected-add-credentials-username";
         String secretValue = "secret-value";
         Secret secret = Secret.fromString(secretValue);
-        StandardUsernamePasswordCredentials credentials = new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
+        StandardUsernamePasswordCredentials credentials =
+                new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
 
         assertFalse(provider.supports(username, password));
         assertFalse(provider.supports(maskedUsername, unmaskedUsername));
@@ -110,7 +116,14 @@ public class SmartCredentialsProviderTest {
 
         assertFalse(provider.supports(maskedStringType, unmaskedStringType));
         /* Check that if any arguments are not supported, method returns false */
-        assertFalse(provider.supports(username, password, maskedUsername, unmaskedUsername, specialStringType, maskedStringType, unmaskedStringType));
+        assertFalse(provider.supports(
+                username,
+                password,
+                maskedUsername,
+                unmaskedUsername,
+                specialStringType,
+                maskedStringType,
+                unmaskedStringType));
         assertNull(specialStringType.getValue()); /* Expected, since nothing has been assigned */
 
         assertTrue(provider.get(gitURI, username, password, maskedUsername, unmaskedUsername, specialStringType));
@@ -147,7 +160,8 @@ public class SmartCredentialsProviderTest {
         String expectedUsername = "expected-add-credentials-username";
         String secretValue = "secret-value";
         Secret secret = Secret.fromString(secretValue);
-        StandardUsernamePasswordCredentials credentials = new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
+        StandardUsernamePasswordCredentials credentials =
+                new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
 
         assertFalse(provider.supports(username, password));
         assertFalse(provider.supports(maskedUsername, unmaskedUsername));
@@ -168,7 +182,14 @@ public class SmartCredentialsProviderTest {
 
         assertFalse(provider.supports(maskedStringType, unmaskedStringType));
         /* Check that if any arguments are not supported, method returns false */
-        assertFalse(provider.supports(username, password, maskedUsername, unmaskedUsername, specialStringType, maskedStringType, unmaskedStringType));
+        assertFalse(provider.supports(
+                username,
+                password,
+                maskedUsername,
+                unmaskedUsername,
+                specialStringType,
+                maskedStringType,
+                unmaskedStringType));
 
         assertTrue(provider.get(null, username, password, maskedUsername, unmaskedUsername, specialStringType));
 
@@ -203,7 +224,8 @@ public class SmartCredentialsProviderTest {
         String expectedUsername = "expected-add-credentials-username";
         String secretValue = "secret-value";
         Secret secret = Secret.fromString(secretValue);
-        StandardUsernamePasswordCredentials credentials = new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
+        StandardUsernamePasswordCredentials credentials =
+                new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
         maskedUsername.setValue(credentials);
         assertEquals(credentials, maskedUsername.getValue());
         maskedUsername.clear();
@@ -214,9 +236,28 @@ public class SmartCredentialsProviderTest {
     public void testGetThrowsException() {
         String expectedUsername = "expected-add-credentials-username";
         Secret secret = Secret.fromString("password-secret");
-        StandardUsernamePasswordCredentials credentials = new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
+        StandardUsernamePasswordCredentials credentials =
+                new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
         provider.addCredentials(gitURI.toString(), credentials);
-        assertThrows(UnsupportedCredentialItem.class,
-                     () -> provider.get(gitURI, username, password, maskedUsername, unmaskedUsername, maskedStringType));
+        assertThrows(
+                UnsupportedCredentialItem.class,
+                () -> provider.get(gitURI, username, password, maskedUsername, unmaskedUsername, maskedStringType));
+    }
+
+    @Test
+    public void testSimilarUrlsAcceptedForCredentials() {
+        String expectedUsername = "expected-add-credentials-username";
+        String secretValue = "secret-value";
+        Secret secret = Secret.fromString(secretValue);
+        StandardUsernamePasswordCredentials credentials =
+                new StandardUsernamePasswordCredentialsImpl(expectedUsername, secret);
+
+        assertFalse(provider.get(gitURI, username, password));
+
+        provider.addCredentials(gitURI.toString(), credentials);
+
+        assertTrue(provider.get(gitURI, username, password));
+        assertTrue(provider.get(gitURISlash, username, password));
+        assertTrue(provider.get(gitURIShort, username, password));
     }
 }

@@ -1,18 +1,17 @@
 package hudson.plugins.git;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+
 import hudson.EnvVars;
 import hudson.model.TaskListener;
 import hudson.tools.AbstractCommandInstaller;
 import hudson.tools.BatchCommandInstaller;
 import hudson.tools.CommandInstaller;
 import hudson.tools.InstallSourceProperty;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,7 +20,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 public class GitToolResolverTest {
 
     @Rule
-    public JenkinsRule j = new JenkinsRule();
+    public JenkinsRule r = new JenkinsRule();
 
     private GitTool gitTool;
 
@@ -35,18 +34,20 @@ public class GitToolResolverTest {
     public void shouldResolveToolsOnMaster() throws Exception {
         // Jenkins 2.307+ uses "built-in" for the label on the controller node
         // Before 2.307, used the deprecated term "master"
-        final String label = j.jenkins.getSelfLabel().getName();
+        final String label = r.jenkins.getSelfLabel().getName();
         final String command = "echo Hello";
         final String toolHome = "TOOL_HOME";
         AbstractCommandInstaller installer = isWindows()
                 ? new BatchCommandInstaller(label, command, toolHome)
                 : new CommandInstaller(label, command, toolHome);
-        GitTool t = new GitTool("myGit", null, Collections.singletonList(
-                new InstallSourceProperty(Collections.singletonList(installer))));
+        GitTool t = new GitTool(
+                "myGit",
+                null,
+                Collections.singletonList(new InstallSourceProperty(Collections.singletonList(installer))));
         t.getDescriptor().setInstallations(t);
 
         GitTool defaultTool = GitTool.getDefaultInstallation();
-        GitTool resolved = (GitTool) defaultTool.translate(j.jenkins, new EnvVars(), TaskListener.NULL);
+        GitTool resolved = (GitTool) defaultTool.translate(r.jenkins, new EnvVars(), TaskListener.NULL);
         assertThat(resolved.getGitExe(), containsString(toolHome));
     }
 
