@@ -658,12 +658,6 @@ public class GitClientCloneTest {
     // Most tests use this method, expecting a non-bare repo
     private void assertAlternateFilePointsToLocalMirror()
             throws IOException, InterruptedException {
-/*
-        final String altdir = testGitDir.getPath() + File.separator + ".git";
-        final String alternates =
-                ".git" + File.separator + "objects" + File.separator + "info" + File.separator + "alternates";
-        assertAlternateFilePointsToLocalMirror(testGitDir.getPath(), altdir, alternates);
-*/
         assertAlternateFilePointsToLocalWorkspaceMirror(testGitDir);
     }
 
