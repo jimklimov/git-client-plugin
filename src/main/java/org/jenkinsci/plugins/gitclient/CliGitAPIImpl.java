@@ -874,13 +874,16 @@ public class CliGitAPIImpl extends LegacyCompatibleGitAPIImpl {
                             } else {
                                 // Go behind git's back to write a meta file in new workspace
                                 File alternates = new File(workspace, ".git/objects/info/alternates");
-                                try (PrintWriter w = new PrintWriter(alternates, Charset.defaultCharset())) {
+                                try (PrintWriter w = new PrintWriter(
+                                        alternates, Charset.defaultCharset().toString())) {
                                     String absoluteReference =
                                             objectsPath.getAbsolutePath().replace('\\', '/');
                                     listener.getLogger().println("Using reference repository: " + reference);
                                     // git implementations on windows also use
                                     w.print(absoluteReference);
-                                } catch (IOException e) {
+                                } catch (UnsupportedEncodingException ex) {
+                                    listener.error("Default character set is an unsupported encoding");
+                                } catch (FileNotFoundException e) {
                                     listener.error("Failed to setup reference");
                                 }
                             }
