@@ -52,7 +52,7 @@ JGit is *disabled by default* when the git client plugin is installed.
 [#enabling-jgit]
 === Enabling JGit
 
-Click the "*Add Git*" button in the "*Global Tool Configuration*" section under "*Manage Jenkins*" to add JGit or JGit with Apache HTTP Client as a git implementation.
+Click the "*Add Git*" button in the "*Tools*" section under "*Manage Jenkins*" to add JGit or JGit with Apache HTTP Client as a git implementation.
 
 image::images/enable-jgit.png[Enable JGit or JGit with Apache HTTP Client]
 
@@ -89,12 +89,12 @@ Jenkins is well suited to use MinGit on Windows agents.
 
 image::images/mingit-for-windows-as-a-tool.png[Configure MinGit for Windows to install automatically]
 
-* Configure a global git tool from "Manage Jenkins" >> "Global Tool Configuration" with `git` as the `Path to Git executable`
+* Configure a global git tool from "Manage Jenkins" >> "Tools" with `git` as the `Path to Git executable`
 * Set the label `windows` to limit the tool installer to agents with the `windows` label
-* Set the `Download URL for binary archive` as the URL of your locally downloaded copy of the link:https://github.com/git-for-windows/git/releases/[MinGit zip file]
+* Set the `Download URL for binary archive` as the URL of your **locally downloaded copy** of the link:https://github.com/git-for-windows/git/releases/[MinGit zip file]
 * Specify `mingw64\bin\git.exe` as the `Subdirectory of extracted archive`.
 
-Git for Windows Portable will be installed on each agent in `tools\git\mingw64`.
+MinGit will be installed on each agent in `tools\git\mingw64`.
 The path to the git executable will be `tools\git\mingw64\bin\git.exe`.
 
 [#windows-credentials-manager]
@@ -129,7 +129,7 @@ No verification::
 Disables all verification of ssh host keys.
 **Not recommended** because it provides no protection from "man-in-the-middle" attacks
 
-Configure the host key verification strategy from "Manage Jenkins" >> "Configure Global Security" >> "Git Host Key Verification Configuration".
+Configure the host key verification strategy from "Manage Jenkins" >> "Security" >> "Git Host Key Verification Configuration".
 
 image::images/ssh-host-key-verification.png[Configure Ssh host key verification]
 
