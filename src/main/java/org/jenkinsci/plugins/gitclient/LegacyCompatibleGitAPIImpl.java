@@ -22,6 +22,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -237,8 +238,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                 */
                 LOGGER.log(
                         Level.FINEST,
-                        "getObjectsFile(): found an fGit '"
-                                + fGit.getAbsolutePath().toString() + "' which is a directory");
+                        "getObjectsFile(): found an fGit '" + fGit.getAbsolutePath() + "' which is a directory");
             } else {
                 // If ".git" FS object exists and is a not-empty file (and
                 // is not a dir), then its content may point to some other
@@ -249,12 +249,10 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                 //   "gitdir: ../.git/modules/childRepoName"
                 LOGGER.log(
                         Level.FINEST,
-                        "getObjectsFile(): found an fGit '"
-                                + fGit.getAbsolutePath().toString() + "' which is NOT a directory");
-                BufferedReader reader = null;
-                try {
+                        "getObjectsFile(): found an fGit '" + fGit.getAbsolutePath() + "' which is NOT a directory");
+                try (BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(new FileInputStream(fGit), "UTF-8"))) {
                     String line;
-                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(fGit), "UTF-8"));
                     while ((line = reader.readLine()) != null) {
                         String[] parts = line.split(":", 2);
                         if (parts.length >= 2) {
@@ -265,9 +263,9 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                                 LOGGER.log(
                                         Level.FINE,
                                         "getObjectsFile(): while looking for 'gitdir:' in '"
-                                                + fGit.getAbsolutePath().toString()
+                                                + fGit.getAbsolutePath()
                                                 + "', found reference to objects which should be at: '"
-                                                + objects.getAbsolutePath().toString() + "'");
+                                                + objects.getAbsolutePath() + "'");
                                 // Note: we don't use getCanonicalPath() here to avoid further filesystem
                                 // access and possible exceptions (the getAbsolutePath() is about string
                                 // processing), but callers might benefit from canonicising and ensuring
@@ -280,39 +278,25 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                             }
                             LOGGER.log(
                                     Level.FINEST,
-                                    "getObjectsFile(): while looking for 'gitdir:' in '"
-                                            + fGit.getAbsolutePath().toString() + "', ignoring line: " + line);
+                                    "getObjectsFile(): while looking for 'gitdir:' in '" + fGit.getAbsolutePath()
+                                            + "', ignoring line: " + line);
                         }
                     }
                     if (objects == null) {
                         LOGGER.log(
                                 Level.WARNING,
-                                "getObjectsFile(): failed to parse '"
-                                        + fGit.getAbsolutePath().toString() + "': did not contain a 'gitdir:' entry");
+                                "getObjectsFile(): failed to parse '" + fGit.getAbsolutePath()
+                                        + "': did not contain a 'gitdir:' entry");
                     }
                 } catch (IOException e) {
                     LOGGER.log(
                             Level.SEVERE,
-                            "getObjectsFile(): failed to parse '"
-                                    + fGit.getAbsolutePath().toString() + "': " + e.toString());
+                            "getObjectsFile(): failed to parse '" + fGit.getAbsolutePath() + "': " + e.toString());
                     objects = null;
-                }
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (IOException e) {
-                    LOGGER.log(
-                            Level.SEVERE,
-                            "getObjectsFile(): failed to close file after parsing '"
-                                    + fGit.getAbsolutePath().toString() + "': " + e.toString());
                 }
             }
         } else {
-            LOGGER.log(
-                    Level.FINEST,
-                    "getObjectsFile(): did not find any checked-out '"
-                            + fGit.getAbsolutePath().toString() + "'");
+            LOGGER.log(Level.FINEST, "getObjectsFile(): did not find any checked-out '" + fGit.getAbsolutePath() + "'");
         }
 
         if (objects == null || !objects.isDirectory()) {
@@ -329,19 +313,15 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                 if (objects.isDirectory()) {
                     LOGGER.log(
                             Level.FINEST,
-                            "getObjectsFile(): found a bare '"
-                                    + objects.getAbsolutePath().toString() + "' which is a directory");
+                            "getObjectsFile(): found a bare '" + objects.getAbsolutePath() + "' which is a directory");
                 } else {
                     LOGGER.log(
                             Level.FINEST,
-                            "getObjectsFile(): found a bare '"
-                                    + objects.getAbsolutePath().toString() + "' which is NOT a directory");
+                            "getObjectsFile(): found a bare '" + objects.getAbsolutePath()
+                                    + "' which is NOT a directory");
                 }
             } else {
-                LOGGER.log(
-                        Level.FINEST,
-                        "getObjectsFile(): did not find any bare '"
-                                + objects.getAbsolutePath().toString() + "'");
+                LOGGER.log(Level.FINEST, "getObjectsFile(): did not find any bare '" + objects.getAbsolutePath() + "'");
             }
         }
 
@@ -410,7 +390,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
             value = "DMI_HARDCODED_ABSOLUTE_FILENAME",
             justification = "Path operations below intentionally use absolute '/' in some cases")
     public static String normalizeGitUrl(String url, Boolean checkLocalPaths) {
-        String urlNormalized = url.replaceAll("/*$", "").replaceAll(".git$", "").toLowerCase();
+        String urlNormalized = url.replaceAll("/*$", "").replaceAll(".git$", "").toLowerCase(Locale.ENGLISH);
         if (!url.contains("://")) {
             if (!url.startsWith("/") && !url.startsWith(".")) {
                 // Not an URL with schema, not an absolute or relative pathname
@@ -526,10 +506,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
         // We want to hit same dirs only once, so canonicize paths below
         String referenceBaseDirAbs;
         try {
-            referenceBaseDirAbs = new File(referenceBaseDir)
-                    .getAbsoluteFile()
-                    .getCanonicalPath()
-                    .toString();
+            referenceBaseDirAbs = new File(referenceBaseDir).getAbsoluteFile().getCanonicalPath();
         } catch (IOException e) {
             // Access error while dereferencing some parent?..
             referenceBaseDirAbs = new File(referenceBaseDir).getAbsoluteFile().toString();
@@ -618,7 +595,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
             // FS object.
             arrDirnames.add(referenceBaseDirAbs + "/" + needleBasename);
             arrDirnames.add(referenceBaseDirAbs + "/" + needleBasename + ".git");
-            needleBasenameLC = needleBasename.toLowerCase();
+            needleBasenameLC = needleBasename.toLowerCase(Locale.ENGLISH);
             if (!needleBasenameLC.equals(needleBasename)) {
                 // Retry with lowercased dirname
                 arrDirnames.add(referenceBaseDirAbs + "/" + needleBasenameLC);
@@ -930,9 +907,7 @@ abstract class LegacyCompatibleGitAPIImpl extends AbstractGitAPIImpl implements 
                 // Iterating to filter suggestions in order of original
                 // directory-walk prioritization under current reference
                 String dirName = subEntry[0];
-                String uri = subEntry[1];
                 String uriNorm = subEntry[2];
-                String remoteName = subEntry[3];
                 Integer sep;
                 String uriNormBasename;
                 String dirBasename;
