@@ -53,6 +53,7 @@ public class KnownHostsFileVerifierTest {
                         22,
                         fakeKnownHosts,
                         knownHostsFileVerifier.forJGit(StreamBuildListener.fromStdout()),
+                        "ecdsa-sha2-nistp256",
                         s -> {
                             assertThat(s.isOpen(), is(true));
                             Awaitility.await().atMost(Duration.ofSeconds(45)).until(() -> s.getServerKey() != null);
@@ -64,6 +65,7 @@ public class KnownHostsFileVerifierTest {
 
     @Test
     public void connectWhenHostKeyProvidedThenShouldNotFail() throws IOException {
+        Assume.assumeTrue(runKnownHostsTests());
         KnownHostsFileVerifier knownHostsFileVerifier = spy(new KnownHostsFileVerifier());
         when(knownHostsFileVerifier.getKnownHostsFile()).thenReturn(fakeKnownHosts);
 
@@ -73,6 +75,7 @@ public class KnownHostsFileVerifierTest {
                         22,
                         fakeKnownHosts,
                         knownHostsFileVerifier.forJGit(StreamBuildListener.fromStdout()),
+                        "ecdsa-sha2-nistp256",
                         s -> {
                             assertThat(s.isOpen(), is(true));
                             Awaitility.await().atMost(Duration.ofSeconds(45)).until(() -> s.getServerKey() != null);
@@ -84,6 +87,7 @@ public class KnownHostsFileVerifierTest {
 
     @Test
     public void connectWhenHostKeyInKnownHostsFileWithNotDefaultAlgorithmThenShouldNotFail() throws IOException {
+        Assume.assumeTrue(runKnownHostsTests());
         fakeKnownHosts = knownHostsTestUtil.createFakeKnownHosts(
                 "fake2.ssh",
                 "known_hosts_fake2",
@@ -96,6 +100,7 @@ public class KnownHostsFileVerifierTest {
                         22,
                         fakeKnownHosts,
                         knownHostsFileVerifier.forJGit(StreamBuildListener.fromStdout()),
+                        "ecdsa-sha2-nistp256",
                         s -> {
                             assertThat(s.isOpen(), is(true));
                             Awaitility.await().atMost(Duration.ofSeconds(45)).until(() -> s.getServerKey() != null);
